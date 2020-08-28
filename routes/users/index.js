@@ -152,6 +152,31 @@ route.get("/friend-success/:id", async (req, res) => {
   updateFriend(idFriend, id, res, "success");
 });
 
+route.get("/posts/:id/:page", async (req, res) => {
+  console.log(req.params.page);
+  const id = req.params.id;
+  let result = await Post.find({ userId: id })
+    .skip(parseInt(req.params.page))
+    .limit(9);
+  res.json(message.messageSuccess("Success", result));
+});
+
+route.get("/post-user/:id", async (req, res) => {
+  const id = req.params.id;
+  let result = await Post.findOne({ _id: id });
+  if (!result) res.status("400").send("Không tìm thấy bài viết này");
+  let resultUser = await User.findOne({ _id: result.userId }, "image name");
+
+  const response = {
+    ...result._doc,
+    user: resultUser,
+  };
+  res.json(message.messageSuccess("Success", response));
+  // setTimeout(() => {
+  //   res.json(message.messageSuccess("Success", response));
+  // }, 50000);
+});
+
 route.post("/", async (req, res) => {
   const user = new User({
     name: req.body.name,

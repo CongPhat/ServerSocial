@@ -14,6 +14,7 @@ app.use(bodyParser.json());
 
 const PostRouter = require("./routes/posts");
 const UserRouter = require("./routes/users");
+const CommentRouter = require("./routes/comments");
 
 app.get("/", (req, res) => {
   res.send("Let's goooooo");
@@ -21,6 +22,7 @@ app.get("/", (req, res) => {
 
 app.use("/post", PostRouter);
 app.use("/user", UserRouter);
+app.use("/comment", CommentRouter);
 
 mongoose.connect(
   process.env.MONGOODB,

@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const message = require("./../../helper/messageResponse");
 const User = require("../../models/Users");
 const Post = require("../../models/Posts");
+const Comment = require("../../models/Comments");
 
 const route = express.Router();
 
@@ -167,11 +168,45 @@ route.get("/post-user/:id", async (req, res) => {
   if (!result) res.status("400").send("Không tìm thấy bài viết này");
   let resultUser = await User.findOne({ _id: result.userId }, "image name");
 
-  const response = {
-    ...result._doc,
-    user: resultUser,
-  };
-  res.json(message.messageSuccess("Success", response));
+  let resultComment = await Comment.find({ postId: id });
+
+  const resultUserComment = Promise.all(
+    resultComment.map(async (item) => {
+      const userFind = await User.findOne({ _id: item.userId }, "name image");
+      return {
+        ...item._doc,
+        user: userFind,
+      };
+    })
+  );
+  resultUserComment.then((data) => {
+    const dataComment = data.filter((item) => item.idCommentParrent === "");
+    const dataCommentChild = data.filter(
+      (item) => item.idCommentParrent !== ""
+    );
+
+    const dataCommentParrent = dataComment.map((itemComment) => {
+      console.log(itemComment);
+      const dataFilter = dataCommentChild.filter((itemFilter) => {
+        console.log(itemFilter);
+        return itemFilter.idCommentParrent == itemComment._id;
+      });
+      // return res.json(message.messageSuccess("Success", dataFilter));
+
+      return {
+        ...itemComment,
+        childs: dataFilter,
+      };
+    });
+
+    const response = {
+      ...result._doc,
+      user: resultUser,
+      comments: dataCommentParrent,
+    };
+    res.json(message.messageSuccess("Success", response));
+  });
+
   // setTimeout(() => {
   //   res.json(message.messageSuccess("Success", response));
   // }, 50000);

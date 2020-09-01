@@ -5,6 +5,7 @@ const message = require("./../../helper/messageResponse");
 const User = require("../../models/Users");
 const Post = require("../../models/Posts");
 const Comment = require("../../models/Comments");
+var ObjectId = require("mongoose").Types.ObjectId;
 
 const route = express.Router();
 
@@ -154,62 +155,60 @@ route.get("/friend-success/:id", async (req, res) => {
 });
 
 route.get("/posts/:id/:page", async (req, res) => {
-  console.log(req.params.page);
   const id = req.params.id;
   let result = await Post.find({ userId: id })
     .skip(parseInt(req.params.page))
     .limit(9);
-  res.json(message.messageSuccess("Success", result));
+  const resultPostComment = Promise.all(
+    result.map(async (item) => {
+      const totalComment = await Comment.countDocuments({ postId: item._id });
+      return {
+        ...item._doc,
+        totalComment,
+      };
+    })
+  );
+  resultPostComment.then((data) => {
+    res.json(message.messageSuccess("Success", data));
+  });
 });
 
 route.get("/post-user/:id", async (req, res) => {
   const id = req.params.id;
-  let result = await Post.findOne({ _id: id });
+  let result = await Post.findOne({ _id: new ObjectId(id) });
   if (!result) res.status("400").send("Không tìm thấy bài viết này");
   let resultUser = await User.findOne({ _id: result.userId }, "image name");
 
-  let resultComment = await Comment.find({ postId: id });
-
-  const resultUserComment = Promise.all(
-    resultComment.map(async (item) => {
-      const userFind = await User.findOne({ _id: item.userId }, "name image");
-      return {
-        ...item._doc,
-        user: userFind,
-      };
-    })
+  console.time("result_comment");
+  let resultComment = await Comment.find({ postId: id }).populate(
+    "user",
+    "name image"
   );
-  resultUserComment.then((data) => {
-    const dataComment = data.filter((item) => item.idCommentParrent === "");
-    const dataCommentChild = data.filter(
-      (item) => item.idCommentParrent !== ""
-    );
+  console.timeEnd("result_comment");
 
-    const dataCommentParrent = dataComment.map((itemComment) => {
-      console.log(itemComment);
-      const dataFilter = dataCommentChild.filter((itemFilter) => {
-        console.log(itemFilter);
-        return itemFilter.idCommentParrent == itemComment._id;
-      });
-      // return res.json(message.messageSuccess("Success", dataFilter));
+  const dataComment = resultComment.filter(
+    (item) => item.idCommentParrent === ""
+  );
+  const dataCommentChild = resultComment.filter(
+    (item) => item.idCommentParrent !== ""
+  );
 
-      return {
-        ...itemComment,
-        childs: dataFilter,
-      };
+  const dataCommentParrent = dataComment.map((itemComment) => {
+    const dataFilter = dataCommentChild.filter((itemFilter) => {
+      return itemFilter.idCommentParrent == itemComment._id;
     });
-
-    const response = {
-      ...result._doc,
-      user: resultUser,
-      comments: dataCommentParrent,
+    return {
+      ...itemComment._doc,
+      childs: dataFilter,
     };
-    res.json(message.messageSuccess("Success", response));
   });
 
-  // setTimeout(() => {
-  //   res.json(message.messageSuccess("Success", response));
-  // }, 50000);
+  const response = {
+    ...result._doc,
+    user: resultUser,
+    comments: dataCommentParrent,
+  };
+  res.json(message.messageSuccess("Success", response));
 });
 
 route.post("/", async (req, res) => {

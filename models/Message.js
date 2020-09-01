@@ -1,24 +1,20 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const CommentsSchema = mongoose.Schema({
+const MessageSchema = mongoose.Schema({
   content: {
     type: String,
     required: true,
   },
-  user: {
+  roomMessage: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "RoomMessage",
+  },
+  userSend: {
     type: Schema.Types.ObjectId,
     required: true,
     ref: "Users",
-  },
-  postId: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    ref: "Posts",
-  },
-  idCommentParrent: {
-    type: String,
-    // required: true,
   },
   like: {
     type: Number,
@@ -30,4 +26,4 @@ const CommentsSchema = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("Comments", CommentsSchema);
+module.exports = mongoose.model("Message", MessageSchema);

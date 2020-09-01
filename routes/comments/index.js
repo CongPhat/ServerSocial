@@ -33,7 +33,6 @@ route.get("/:id", async (req, res) => {
 });
 
 route.post("/", async (req, res) => {
-  console.log(req.body.idParentComment);
   const { id } = jwt.decode(req.headers.authorization);
   if (!id)
     return res.status(401).send({
@@ -43,20 +42,22 @@ route.post("/", async (req, res) => {
   const comment = new Comment({
     content: req.body.comment,
     postId: req.body.id,
-    userId: id,
+    user: id,
     idCommentParrent: req.body.idParentComment || "",
   });
   await comment
     .save()
     .then(async (data) => {
-      const userFind = await User.findOne({ _id: data.userId }, "image name");
+      const userFind = await User.findOne({ _id: data.user }, "image name");
       const dataSend = {
         ...data._doc,
         user: userFind,
+        childs: [],
       };
       res.json(message.messageSuccess("Success", dataSend));
     })
     .catch((error) => {
+      console.log(error);
       res.status("404").send(error.message);
     });
 });

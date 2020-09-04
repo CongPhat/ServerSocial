@@ -15,6 +15,7 @@ route.get("/", async (req, res) => {
 });
 
 route.get("/:id", async (req, res) => {
+  console.log(req.params.id);
   await User.findById(
     req.params.id,
     "email image name description friend",
@@ -44,6 +45,7 @@ route.get("/:id", async (req, res) => {
         totalFriend: dataTotalFriend.length,
         friend: undefined,
         isFriend: dataFindIdFriend || null,
+        isOwner: id == req.params.id,
       };
       res.json(message.messageSuccess("Success", dataUserPost));
     }
@@ -232,11 +234,17 @@ route.post("/", async (req, res) => {
 
 route.post("/login", async (req, res) => {
   const passwordMd5 = md5(req.body.password);
+  let resultTest = await User.find();
   let result = await User.findOne({ email: req.body.email });
   if (result) {
     if (result.password === passwordMd5) {
       const token = jwt.sign(
-        { email: req.body.email, id: result._id },
+        {
+          email: req.body.email,
+          id: result._id,
+          image: result.image,
+          name: result.name,
+        },
         "shhhhh"
       );
       const query = { email: req.body.email };

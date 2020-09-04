@@ -1,6 +1,7 @@
 const express = require("express");
 const Post = require("../../models/Posts");
 const User = require("./../../models/Users");
+const Comment = require("./../../models/Comments");
 
 const route = express.Router();
 
@@ -15,9 +16,14 @@ route.get("/", async (req, res) => {
   const result = Promise.all(
     dataFind.map(async (item) => {
       const userFind = await User.findOne({ _id: item.userId });
+      const commentFind = await Comment.find({
+        postId: item._id,
+        idCommentParrent: "",
+      }).populate("user", "name");
       return {
         ...item._doc,
         user: userFind,
+        comments: commentFind,
       };
     })
   );

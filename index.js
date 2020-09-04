@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
 
+const mongoUrl =
+  "mongodb://192.168.10.243:27017/phatdb?retryWrites=true&w=majority";
 //server socket
 const server = require("http").createServer(app);
 const io = require("socket.io").listen(server);
@@ -27,20 +29,32 @@ const CommentRouter = require("./routes/comments");
 const MessageRouter = require("./routes/message");
 
 app.get("/", (req, res) => {
-  res.send("Let's goooooo");
+  res.send("Let's goooooo thooii");
 });
 app.use("/post", PostRouter);
 app.use("/user", UserRouter);
 app.use("/comment", CommentRouter);
 app.use("/message", MessageRouter);
 
-mongoose.connect(
-  process.env.MONGOODB,
-  { useNewUrlParser: true, useUnifiedTopology: true },
-  () => {
-    console.log("connect DB");
-  }
-);
+const connectWithRetry = function () {
+  // when using with docker, at the time we up containers. Mongodb take few seconds to starting, during that time NodeJS server will try to connect MongoDB until success.
+  return mongoose.connect(
+    mongoUrl,
+    { useNewUrlParser: true, useFindAndModify: false },
+    (err) => {
+      if (err) {
+        console.error(
+          "Failed to connect to mongo on startup - retrying in 5 sec",
+          err
+        );
+        setTimeout(connectWithRetry, 5000);
+      } else {
+        console.log("Connect");
+      }
+    }
+  );
+};
+connectWithRetry();
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

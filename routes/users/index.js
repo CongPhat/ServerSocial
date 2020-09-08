@@ -15,7 +15,6 @@ route.get("/", async (req, res) => {
 });
 
 route.get("/:id", async (req, res) => {
-  console.log(req.params.id);
   await User.findById(
     req.params.id,
     "email image name description friend",
@@ -160,7 +159,8 @@ route.get("/posts/:id/:page", async (req, res) => {
   const id = req.params.id;
   let result = await Post.find({ userId: id })
     .skip(parseInt(req.params.page))
-    .limit(9);
+    .limit(9)
+    .sort({ date: "desc" });
   const resultPostComment = Promise.all(
     result.map(async (item) => {
       const totalComment = await Comment.countDocuments({ postId: item._id });
@@ -245,7 +245,7 @@ route.post("/login", async (req, res) => {
           image: result.image,
           name: result.name,
         },
-        "shhhhh"
+        "tokenTiny"
       );
       const query = { email: req.body.email };
       const update = { token };

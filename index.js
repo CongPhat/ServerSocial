@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
+const multer = require("multer");
 
 const mongoUrl =
   "mongodb://192.168.10.243:27017/phatdb?retryWrites=true&w=majority";
@@ -21,6 +22,8 @@ app.use(
   })
 );
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(multer().array());
 app.set("socketio", io);
 
 const PostRouter = require("./routes/posts");
@@ -35,6 +38,7 @@ app.use("/post", PostRouter);
 app.use("/user", UserRouter);
 app.use("/comment", CommentRouter);
 app.use("/message", MessageRouter);
+app.use("/img", express.static("public/images"));
 
 const connectWithRetry = function () {
   // when using with docker, at the time we up containers. Mongodb take few seconds to starting, during that time NodeJS server will try to connect MongoDB until success.

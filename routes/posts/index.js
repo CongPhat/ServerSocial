@@ -1,7 +1,20 @@
 const express = require("express");
+const path = require("path");
 const Post = require("../../models/Posts");
 const User = require("./../../models/Users");
 const Comment = require("./../../models/Comments");
+const controllerPost = require("./../../controller/posts");
+const controllerAuth = require("./../../controller/auth");
+const multer = require("multer");
+const store = multer.diskStorage({
+  destination: "public/images",
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString() + file.originalname);
+  },
+});
+const upload = multer({ storage: store });
+// var upload = multer({ dest: "./" });
+// const Resize = require("./../../resize");
 
 const route = express.Router();
 
@@ -11,26 +24,13 @@ const Get = async (id) => {
   });
 };
 
-route.get("/", async (req, res) => {
-  const dataFind = await Post.find();
-  const result = Promise.all(
-    dataFind.map(async (item) => {
-      const userFind = await User.findOne({ _id: item.userId });
-      const commentFind = await Comment.find({
-        postId: item._id,
-        idCommentParrent: "",
-      }).populate("user", "name");
-      return {
-        ...item._doc,
-        user: userFind,
-        comments: commentFind,
-      };
-    })
-  );
-  result.then((data) => {
-    res.send(data);
-  });
-});
+route.get("/", controllerPost.getData);
+route.post(
+  "/",
+  controllerAuth.checkToken,
+  upload.single("image"),
+  controllerPost.insert
+);
 
 route.get("/:id", async (req, res) => {
   await Post.findById(req.params.id, (err, data) => {

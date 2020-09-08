@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   app:
-    image: learning-docker/docker-node-mongo-redis:v1
+    image: learning-docker/node:v1
     volumes:
       - ./:/app
     environment: # phần này ta định nghĩa ở file .env nhé

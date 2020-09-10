@@ -6,10 +6,15 @@ const MessageSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  roomMessage: {
-    type: Schema.Types.ObjectId,
+  // roomMessage: {
+  //   type: Schema.Types.ObjectId,
+  //   required: true,
+  //   ref: "RoomMessage",
+  // },
+  user: {
+    type: [String],
     required: true,
-    ref: "RoomMessage",
+    ref: "Users",
   },
   userSend: {
     type: Schema.Types.ObjectId,

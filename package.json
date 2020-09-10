@@ -10,12 +10,17 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "apollo-server-express": "^2.17.0",
     "atob": "^2.1.2",
     "body-parser": "^1.19.0",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-graphql": "^0.11.0",
     "formidable": "^1.2.2",
+    "graphql": "^15.3.0",
+    "graphql-subscriptions": "^1.1.0",
+    "graphql-yoga": "^1.18.3",
     "joi": "^17.2.0",
     "jsonwebtoken": "^8.5.1",
     "md5": "^2.3.0",
@@ -23,6 +28,7 @@
     "multer": "^1.4.2",
     "nodemon": "^2.0.4",
     "socket.io": "^2.3.0",
+    "subscriptions-transport-ws": "^0.9.18",
     "uuid": "^8.3.0"
   }
 }

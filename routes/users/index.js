@@ -233,9 +233,12 @@ route.post("/", async (req, res) => {
 });
 
 route.post("/login", async (req, res) => {
+  console.log(req.body.email);
   const passwordMd5 = md5(req.body.password);
-  let resultTest = await User.find();
+  let resultTest = await Post.find();
+  console.log(resultTest);
   let result = await User.findOne({ email: req.body.email });
+  console.log(result);
   if (result) {
     if (result.password === passwordMd5) {
       const token = jwt.sign(

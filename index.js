@@ -58,8 +58,7 @@ apolloServer.applyMiddleware({ app });
 
 const pubsub = new PubSub();
 const server = createServer(app);
-
-server.listen(3001, () => {
+server.listen(3000, () => {
   new SubscriptionServer(
     {
       execute,
@@ -70,20 +69,10 @@ server.listen(3001, () => {
     },
     {
       server: server,
-      path: "/subscriptions",
+      path: `/subscriptions`,
     }
   );
 });
-
-// app.use(
-//   "/graphql",
-//   // controllerAuth.checkToken,
-//   graphqlHTTP({
-//     schema: schemaGraphql,
-//     rootValue: resolversGraphql,
-//     graphiql: true,
-//   })
-// );
 
 const connectWithRetry = function () {
   // when using with docker, at the time we up containers. Mongodb take few seconds to starting, during that time NodeJS server will try to connect MongoDB until success.
@@ -104,26 +93,3 @@ const connectWithRetry = function () {
   );
 };
 connectWithRetry();
-
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`On ${port}`);
-});
-
-// io.sockets.on("connection", function (socket) {
-//   console.log(socket.id);
-//   console.log(socket.client.conn.server.clientsCount);
-//   socket.on("new user", function (name, data) {
-//     console.log(name);
-//     console.log(data);
-//     // if (name in users) {
-//     //   data(false);
-//     // } else {
-//     //   data(true);
-//     //   socket.nickname = name;
-//     //   users[socket.nickname] = socket;
-//     //   console.log("add nickName");
-//     //   // updateNickNames();
-//     // }
-//   });
-// });

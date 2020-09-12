@@ -1,6 +1,7 @@
 const Message = require("./../models/Message");
 const Users = require("./../models/Users");
 const jwt = require("jsonwebtoken");
+
 const controllerMessage = {
   getMessage: async (id, idUser) => {
     const listMessage = await Message.find({
@@ -8,7 +9,7 @@ const controllerMessage = {
     }).populate("userSend", "image name");
     const listMessageConver = listMessage.map((item) => ({
       ...item._doc,
-      isSend: item.userSend._id == id,
+      isSend: item.userSend._id,
     }));
     return listMessageConver;
   },
@@ -27,7 +28,7 @@ const controllerMessage = {
           "image name"
         );
         data.userSend = userSend;
-        data.isSend = true;
+        data.isSend = userSend._id;
         dataReceive = data;
         return data;
       })

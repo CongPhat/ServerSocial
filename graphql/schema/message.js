@@ -6,7 +6,11 @@ module.exports = {
             userSend: User!
             like: Int!
             date: String!
-            isSend: Boolean 
+            isSend: String!
+        }
+        type Comment {
+          id: String
+          content: String
         }
     `,
   query: `
@@ -17,5 +21,6 @@ module.exports = {
     `,
   subscription: `
         messages(id: String!, idUser: String!): [Message!]!
+        newMessage: Message!
     `,
 };

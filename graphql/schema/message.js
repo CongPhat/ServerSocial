@@ -4,6 +4,7 @@ module.exports = {
             _id: ID!
             content: String!
             userSend: User!
+            userReceive: User!
             like: Int!
             date: String!
             isSend: String!

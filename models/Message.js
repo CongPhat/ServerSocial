@@ -21,6 +21,11 @@ const MessageSchema = mongoose.Schema({
     required: true,
     ref: "Users",
   },
+  userReceive: {
+    type: Schema.Types.ObjectId,
+    required: true,
+    ref: "Users",
+  },
   like: {
     type: Number,
     default: 0,

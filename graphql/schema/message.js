@@ -15,13 +15,13 @@ module.exports = {
         }
     `,
   query: `
-        messages(id: String!, idUser: String!): [Message!]!
+        messages(id: String!, idUser: String!, payload: Int!): [Message!]!
     `,
   mutation: `
         createMessage(text: String!, id: String!, idUser: String!): Message!
     `,
   subscription: `
         messages(id: String!, idUser: String!): [Message!]!
-        newMessage: Message!
+        newMessage(id: String, idUser: String!): Message!
     `,
 };

@@ -3,18 +3,21 @@ const Users = require("./../models/Users");
 const jwt = require("jsonwebtoken");
 
 const controllerMessage = {
-  getMessage: async (id, idUser) => {
+  getMessage: async (id, idUser, payload) => {
     const listMessage = await Message.find({
       user: { $all: [id, idUser] },
     })
+      .sort({ date: "desc" })
+      .skip(payload * 10)
+      .limit(10)
+      // .reverse()
       .populate("userSend", "image name")
       .populate("userReceive", "image name");
     const listMessageConver = listMessage.map((item) => ({
       ...item._doc,
       isSend: item.userSend._id,
     }));
-    console.log(listMessageConver);
-    return listMessageConver;
+    return listMessageConver.reverse();
   },
   createMessage: async (text, id, idUser) => {
     let dataReceive;

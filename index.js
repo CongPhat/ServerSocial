@@ -2,6 +2,7 @@ const express = require("express");
 const Joi = require("joi");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const app = express();
 const { graphqlHTTP } = require("express-graphql");
@@ -53,11 +54,25 @@ app.use("/graphql", bodyParser.json());
 const apolloServer = new ApolloServer({
   schema: schemaGraphql,
   rootValue: resolversGraphql,
+  context: async ({ req, connection }) => {
+    if (connection) {
+      return connection.context;
+    } else {
+      if (!req.headers.authorization) {
+        throw new Error("Missing auth token!");
+      }
+      const userResult = await controllerAuth.checkTokenGraphql(
+        req.headers.authorization
+      );
+      return { userAuth: userResult };
+    }
+  },
 });
 apolloServer.applyMiddleware({ app });
-
+let idUserCurrent = "";
 const pubsub = new PubSub();
 const server = createServer(app);
+// apolloServer.installSubscriptionHandlers(server);
 server.listen(3000, () => {
   new SubscriptionServer(
     {
@@ -66,6 +81,20 @@ server.listen(3000, () => {
       schema: schemaGraphql,
       rootValue: resolversGraphql,
       graphiql: true,
+      onConnect: async (connectionParams, webSocket, context) => {
+        console.log(connectionParams, "connect");
+        const result = await controllerAuth.checkTokenGraphql(
+          connectionParams.authToken
+        );
+        controllerAuth.userOnline(result._id);
+        return { userOnline: result };
+      },
+      onDisconnect: async (webSocket, context) => {
+        context.initPromise.then((res) => {
+          console.log(res, "disconnect");
+          controllerAuth.userOffline(res.userOnline._id);
+        });
+      },
     },
     {
       server: server,
